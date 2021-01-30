@@ -1,6 +1,9 @@
 import 'package:flash_chat/components/rounded_button.dart';
 import 'package:flash_chat/constants.dart';
+import 'package:flash_chat/screens/chat_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:modal_progress_hud/modal_progress_hud.dart';
 
 class LoginScreen extends StatefulWidget {
   static const String id = 'login_screen';
@@ -11,9 +14,14 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   String email;
   String password;
+  bool showSpinner;
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return
+//      ModalProgressHUD(
+//      inAsyncCall: showSpinner,
+//      child:
+        Scaffold(
       backgroundColor: Colors.white,
       body: Padding(
         padding: EdgeInsets.symmetric(horizontal: 24.0),
@@ -58,13 +66,33 @@ class _LoginScreenState extends State<LoginScreen> {
               height: 24.0,
             ),
             RoundedButton(
-              onPressed: () {},
+              onPressed: () async {
+                setState(() {
+                  showSpinner = true;
+                });
+                try {
+                  UserCredential userCredential = await FirebaseAuth.instance
+                      .signInWithEmailAndPassword(
+                          email: email, password: password);
+                  if (userCredential != null) {
+                    Navigator.pushNamed(context, ChatScreen.id);
+                  }
+                  setState(() {
+                    showSpinner = false;
+                  });
+                } catch (e) {
+                  print(e);
+                }
+              },
               color: Colors.lightBlueAccent,
               title: 'Log In',
             ),
           ],
         ),
       ),
-    );
+    )
+//    ,
+//    )
+        ;
   }
 }
